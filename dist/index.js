@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const yt_1 = __importDefault(require("./yt"));
-const url = "https://www.youtube.com/playlist?list=PLbJr1Hz1efqR0pdiT5HxCLmx19-ziVAtz";
+const url = "https://youtube.com/playlist?list=PLbJr1Hz1efqQLiG96yDtiZJkG7YGf8X-K";
 const app = new Promise((resolve, reject) => {
     try {
         resolve((0, yt_1.default)(url));

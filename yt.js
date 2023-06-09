@@ -1,71 +1,34 @@
 const ytdl = require('ytdl-core');
-const ytpl = require('ytpl');
 const fs = require('fs');
 
-let contador = 0
-function mostrarLoader(completadas, listaDeReproduccionLen, correctas, fallidas, actual) {
-    contador++
-    const progreso = (correctas + fallidas) / listaDeReproduccionLen
-    const porcentaje = Math.floor(progreso * 100);
-
-    process.stdout.clearLine();
-    process.stdout.cursorTo(0);
-    process.stdout.write(`Descargando: ${contador}. ${actual}`);
-    process.stdout.write(`\nCorrectas: ${correctas} Fallidas: ${fallidas} Porcentaje: ${porcentaje}% ${correctas + fallidas}/${listaDeReproduccionLen}`);
-
-}
+const listaDeReproduccion = ['https://www.youtube.com/watch?v=Udxl17LVHYA', 'https://www.youtube.com/watch?v=lH3d69sbvX4', 'https://www.youtube.com/watch?v=66zDhaiUVQ4', 'https://www.youtube.com/watch?v=EDecJQxAjDk', 'https://www.youtube.com/watch?v=10EX-_h4pYc', 'https://www.youtube.com/watch?v=p38WgakuYDo', 'https://www.youtube.com/watch?v=krhh4Jmiru8'];
 
 async function descargarMP3() {
-    const repetidas = []
-    const firstResultBatch = await ytpl('PLbJr1Hz1efqQLiG96yDtiZJkG7YGf8X-K', { pages: 1000 });
-    const listaDeReproduccion = []
 
-    firstResultBatch.items.map(item => {
-        if (listaDeReproduccion.findIndex((item2) => item2.name === item.title) == -1) {
-            listaDeReproduccion.push({ url: item.shortUrl, name: item.title });
-        } else {
-            repetidas.push(item);
+    if (!fs.existsSync("averch")) {
+        fs.mkdirSync("averch");
+    }
+    let count = 0
+    const listaPromises = listaDeReproduccion.map(async URL => {
+        const info = await ytdl.getInfo(URL);
+        const archivoMP3 = ytdl.downloadFromInfo(info, {
+            filter: 'audioonly'
+        });
 
-        }
+        const nombreMP3 = `averch/${count}.mp3`;
+
+        archivoMP3.pipe(fs.createWriteStream(nombreMP3));
+
+        count++
+        return new Promise((resolve, reject) => {
+            archivoMP3.on('finish', () => resolve(nombreMP3));
+            archivoMP3.on('error', reject);
+        });
     });
 
-    console.log("repetidas:", repetidas.length);
-
-    const fallidas = [];
-    const correctas = [];
-    let completadas = 0
-
-    const loaderInterval = mostrarLoader(completadas, listaDeReproduccion.length, correctas.length, fallidas.length, listaDeReproduccion[completadas].name);
-    for (const { url, name } of listaDeReproduccion) {
-        try {
-            const info = await ytdl.getInfo(url);
-            const archivoMP3 = ytdl.downloadFromInfo(info, {
-                filter: 'audioonly'
-            });
-
-            const nombreMP3 = `canciones/${info.videoDetails.title}.mp3`;
-
-            archivoMP3.pipe(fs.createWriteStream(nombreMP3)).on('error', (error) => {
-                fallidas.push(info.videoDetails.video_url);
-            });
-
-            if (!fallidas.includes(info.videoDetails.video_url)) {
-                correctas.push(info.videoDetails.video_url)
-            };
-            completadas++
-            mostrarLoader(completadas, listaDeReproduccion.length, correctas.length, fallidas.length, listaDeReproduccion[completadas].name);
-        } catch (error) {
-            console.log("error: " + error);
-        }
-
+    for (const promesa of listaPromises) {
+        console.log(await promesa);
     }
-
-    clearInterval(loaderInterval); // Detener el loader
-    console.log('\n¡Descarga de MP3 completada!'); // Imprimir mensaje de descarga completada
-    console.log(fallidas);
 }
 
 descargarMP3();
-
-
-

@@ -63,10 +63,12 @@ function yt(pathYt) {
                     pages: 1000,
                 });
                 const listaDeReproduccion = [];
-                // rome-ignore lint/suspicious/noExplicitAny: <explanation>
                 firstResultBatch.items.map((item) => {
-                    if (listaDeReproduccion.findIndex((item2) => item2.name === item.title) === -1) {
-                        listaDeReproduccion.push({ url: item.shortUrl, name: item.title });
+                    if (listaDeReproduccion.findIndex((item2) => item2.name === item.title.replace(/[|()[\]{}<>+*?^$\\.,"`']/g, "")) === -1) {
+                        listaDeReproduccion.push({
+                            url: item.shortUrl,
+                            name: item.title.replace(/[|()[\]{}<>+*?^$\\.,"`']/g, ""),
+                        });
                     }
                     else {
                         repetidas.push(item);
@@ -75,7 +77,6 @@ function yt(pathYt) {
                 console.log("repetidas:", repetidas.length);
                 const fallidas = [];
                 const correctas = [];
-                // rome-ignore lint/suspicious/noExplicitAny: <explanation>
                 const canciones = [];
                 let completadas = 0;
                 if (!fs_1.default.existsSync("averch")) {
@@ -88,7 +89,7 @@ function yt(pathYt) {
                             filter: "audioonly",
                         });
                         canciones.push({ name, file: archivoMP3 });
-                        const nombreMP3 = `averch/${info.videoDetails.title}.mp3`;
+                        const nombreMP3 = `averch/${name}.mp3`;
                         archivoMP3
                             .pipe(fs_1.default.createWriteStream(nombreMP3))
                             .on("error", (error) => {
@@ -106,7 +107,9 @@ function yt(pathYt) {
                 }
                 return fallidas;
             });
-            yield descargarMP3().then(() => __awaiter(this, void 0, void 0, function* () {
+            let data = [];
+            yield descargarMP3().then((d) => __awaiter(this, void 0, void 0, function* () {
+                data = d;
                 yield crearArchivoZIP("./averch", "canciones.zip")
                     .then(() => {
                     console.log("¡Archivo ZIP creado exitosamente y carpeta eliminada!");
@@ -115,7 +118,7 @@ function yt(pathYt) {
                     console.error("Error al crear el archivo ZIP:", error);
                 });
             }));
-            return [];
+            return data;
         }
         else {
             return "error en la extraccion de la url";

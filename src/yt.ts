@@ -66,14 +66,18 @@ export default async function yt(pathYt: string) {
       });
       const listaDeReproduccion: { url: string; name: string }[] = [];
 
-      // rome-ignore lint/suspicious/noExplicitAny: <explanation>
       firstResultBatch.items.map((item: any) => {
         if (
           listaDeReproduccion.findIndex(
-            (item2) => item2.name === item.title
+            (item2) =>
+              item2.name ===
+              item.title.replace(/[|()[\]{}<>+*?^$\\.,"`'/]/g, "")
           ) === -1
         ) {
-          listaDeReproduccion.push({ url: item.shortUrl, name: item.title });
+          listaDeReproduccion.push({
+            url: item.shortUrl,
+            name: item.title.replace(/[|()[\]{}<>+*?^$\\.,"`'/]/g, ""),
+          });
         } else {
           repetidas.push(item);
         }
@@ -83,7 +87,6 @@ export default async function yt(pathYt: string) {
 
       const fallidas: { url: string; name: string }[] = [];
       const correctas: { url: string; name: string }[] = [];
-      // rome-ignore lint/suspicious/noExplicitAny: <explanation>
       const canciones: { name: string; file: any }[] = [];
       let completadas = 0;
       if (!fs.existsSync("averch")) {
@@ -97,7 +100,7 @@ export default async function yt(pathYt: string) {
             filter: "audioonly",
           });
           canciones.push({ name, file: archivoMP3 });
-          const nombreMP3 = `averch/${info.videoDetails.title}.mp3`;
+          const nombreMP3 = `averch/${name}.mp3`;
 
           archivoMP3
             .pipe(fs.createWriteStream(nombreMP3))
@@ -119,7 +122,9 @@ export default async function yt(pathYt: string) {
       }
       return fallidas;
     };
-    await descargarMP3().then(async () => {
+    let data: any = [];
+    await descargarMP3().then(async (d) => {
+      data = d;
       await crearArchivoZIP("./averch", "canciones.zip")
         .then(() => {
           console.log("¡Archivo ZIP creado exitosamente y carpeta eliminada!");
@@ -128,7 +133,7 @@ export default async function yt(pathYt: string) {
           console.error("Error al crear el archivo ZIP:", error);
         });
     });
-    return [];
+    return data;
   } else {
     return "error en la extraccion de la url";
   }

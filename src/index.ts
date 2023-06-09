@@ -1,7 +1,7 @@
 import yt from "./yt";
 
 const url =
-  "https://www.youtube.com/playlist?list=PLbJr1Hz1efqR0pdiT5HxCLmx19-ziVAtz";
+  "https://youtube.com/playlist?list=PLbJr1Hz1efqQLiG96yDtiZJkG7YGf8X-K";
 const app = new Promise((resolve, reject) => {
   try {
     resolve(yt(url));
