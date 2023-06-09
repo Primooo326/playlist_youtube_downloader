@@ -3,15 +3,19 @@ const ytpl = require('ytpl');
 const fs = require('fs');
 
 let contador = 0
+
+
+
+
 function mostrarLoader(completadas, listaDeReproduccionLen, correctas, fallidas, actual) {
   contador++
-  const progreso = (correctas + fallidas) / listaDeReproduccionLen
+  const progreso = contador / listaDeReproduccionLen
   const porcentaje = Math.floor(progreso * 100);
 
   process.stdout.clearLine();
   process.stdout.cursorTo(0);
   process.stdout.write(`Descargando: ${contador}. ${actual}`);
-  process.stdout.write(`\nCorrectas: ${correctas} Fallidas: ${fallidas} Porcentaje: ${porcentaje}% ${correctas + fallidas}/${listaDeReproduccionLen}`);
+  process.stdout.write(`\nPorcentaje: ${porcentaje}% ${correctas + fallidas}/${listaDeReproduccionLen}`);
 
 }
 
@@ -43,7 +47,7 @@ async function descargarMP3() {
         filter: 'audioonly'
       });
 
-      const nombreMP3 = `canciones/${info.videoDetails.title}.mp3`;
+      const nombreMP3 = `aver/${info.videoDetails.title}.mp3`;
 
       archivoMP3.pipe(fs.createWriteStream(nombreMP3)).on('error', (error) => {
         fallidas.push(info.videoDetails.video_url);

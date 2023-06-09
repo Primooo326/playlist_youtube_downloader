@@ -13,5 +13,9 @@
   "dependencies": {
     "ytdl-core": "^4.11.4",
     "ytpl": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.2.5",
+    "typescript": "^5.1.3"
   }
 }
