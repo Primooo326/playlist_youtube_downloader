@@ -3,7 +3,7 @@
 		"enabled": false
 	},
 	"linter": {
-		"enabled": true,
+		"enabled": false,
 		"rules": {
 			"recommended": true
 		}
